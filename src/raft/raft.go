@@ -151,7 +151,7 @@ type RequestVoteReply struct {
 // example RequestVote RPC handler.
 //
 func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
-	// rf.checkTerm(args.Term)
+	rf.checkTerm(args.Term)
 	reply.Term = rf.currentTerm
 	reply.VoteGranted = false
 	if args.Term < rf.currentTerm {
@@ -316,7 +316,9 @@ func (rf *Raft) run() {
 			select {
 			case <-rf.stateChanged:
 			case <-electionTimer:
+				rf.mu.Lock()
 				rf.currentTerm++
+				rf.mu.Unlock()
 			}
 			// fmt.Printf("Raft %v election ends with %v support\n", rf.me, rf.sumVotes)
 		case STATE_LEADER:  // leader
