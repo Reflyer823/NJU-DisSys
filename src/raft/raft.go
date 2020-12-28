@@ -267,9 +267,14 @@ func (rf *Raft) run() {
 	for {
 		switch rf.state {
 		case STATE_FOLLOWER:  // follower
+			timer := time.NewTimer(rf.elecTimeOut)
 			select {
 			case <-rf.heartBeat:
-			case <-time.After(rf.elecTimeOut):
+				// stop the timer
+				if !timer.Stop() {
+					<-timer.C
+				}
+			case <-timer.C:
 				// fmt.Printf("Raft %v election time out\n", rf.me)
 				// election time out, convert to candidate
 				rf.mu.Lock()
@@ -281,7 +286,7 @@ func (rf *Raft) run() {
 			}
 		case STATE_CANDIDATE:  // candidate
 			// start election
-			electionTimer := time.After(rf.elecTimeOut)
+			timer := time.NewTimer(rf.elecTimeOut)
 			args := RequestVoteArgs{
 				Term: rf.currentTerm,
 				CandidateId: rf.me,
@@ -315,13 +320,19 @@ func (rf *Raft) run() {
 			// wait until state changed or election timeout
 			select {
 			case <-rf.stateChanged:
-			case <-electionTimer:
+				// stop the timer
+				if !timer.Stop() {
+					<-timer.C
+				}
+			case <-timer.C:
+				// increase term and start a new election
 				rf.mu.Lock()
 				rf.currentTerm++
 				rf.mu.Unlock()
 			}
 			// fmt.Printf("Raft %v election ends with %v support\n", rf.me, rf.sumVotes)
 		case STATE_LEADER:  // leader
+			timer := time.NewTimer(100 * time.Millisecond)
 			args := AppendEntriesArgs{
 				Term: rf.currentTerm,
 				LeaderId: rf.me}
@@ -341,8 +352,12 @@ func (rf *Raft) run() {
 			}
 			// wait until heartbeats timeout or state changed
 			select {
-			case <-time.After(100 * time.Millisecond):
+			case <-timer.C:
 			case <-rf.stateChanged:
+				// stop the timer
+				if !timer.Stop() {
+					<-timer.C
+				}
 			}
 		}
 	}
