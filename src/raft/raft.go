@@ -336,6 +336,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if args.Term < rf.currentTerm {
 		return
 	}
+	// check previous log's index and term
 	if args.PrevLogIndex > len(rf.log) {
 		return
 	}
@@ -358,6 +359,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	}
 	if args.LeaderCommit > rf.commitIndex {
 		rf.mu.Lock()
+		// update commitIndex to min(leaderCommit, lastLogIndex)
 		if args.LeaderCommit < len(rf.log) {
 			rf.updateCommitIndex(args.LeaderCommit)
 		} else {
@@ -382,6 +384,7 @@ func (rf *Raft) sendAppendEntries(i int) {
 		args.PrevLogIndex = rf.nextIndex[i] - 1
 		args.PrevLogTerm = rf.log[args.PrevLogIndex - 1].Term
 	}
+	// if have entries to send, add them to Entries array
 	if len(rf.log) >= rf.nextIndex[i] {
 		numToSend = len(rf.log) - rf.nextIndex[i] + 1
 		args.Entries = make([]LogEntry, numToSend)
@@ -418,6 +421,7 @@ func (rf *Raft) sendAppendEntries(i int) {
 			}
 			// fmt.Printf("%v: send AppendEntries to %v succeeded.\n", rf.me, i)
 		} else {
+			// reply failed, decrease nextIndex and send again.
 			rf.mu.Lock()
 			rf.nextIndex[i]--
 			// fmt.Printf("%v: update nextIndex[%v] = %v\n", rf.me, i, rf.nextIndex[i])
