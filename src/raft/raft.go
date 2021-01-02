@@ -18,15 +18,15 @@ package raft
 //
 
 import (
-	"fmt"
+	// "fmt"
 	"labrpc"
 	"math/rand"
 	"sync"
 	"time"
 )
 
-// import "bytes"
-// import "encoding/gob"
+import "bytes"
+import "encoding/gob"
 
 //
 // as each Raft peer becomes aware that successive log entries are
@@ -74,7 +74,7 @@ type Raft struct {
 	heartBeat    chan bool
 	elecTimeOut  time.Duration
 	sumVotes     int
-	stateChanged chan bool
+	stateChanged chan int
 }
 
 type LogEntry struct {
@@ -94,26 +94,24 @@ func (rf *Raft) GetState() (int, bool) {
 // see paper's Figure 2 for a description of what should be persistent.
 //
 func (rf *Raft) persist() {
-	// Your code here.
-	// Example:
-	// w := new(bytes.Buffer)
-	// e := gob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// data := w.Bytes()
-	// rf.persister.SaveRaftState(data)
+	w := new(bytes.Buffer)
+	e := gob.NewEncoder(w)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.log)
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
 }
 
 //
 // restore previously persisted state.
 //
 func (rf *Raft) readPersist(data []byte) {
-	// Your code here.
-	// Example:
-	// r := bytes.NewBuffer(data)
-	// d := gob.NewDecoder(r)
-	// d.Decode(&rf.xxx)
-	// d.Decode(&rf.yyy)
+	r := bytes.NewBuffer(data)
+	d := gob.NewDecoder(r)
+	d.Decode(&rf.currentTerm)
+	d.Decode(&rf.votedFor)
+	d.Decode(&rf.log)
 }
 
 //
@@ -122,7 +120,7 @@ func (rf *Raft) readPersist(data []byte) {
 func (rf *Raft) sendApplyMsg(index int, command interface{}) {
 	msg := ApplyMsg{Index: index, Command: command}
 	rf.applyCh <- msg
-	fmt.Printf("%v: apply [%v, %v]\n", rf.me, index, command)
+	// fmt.Printf("%v: apply [%v, %v]\n", rf.me, index, command)
 }
 
 //
@@ -151,10 +149,11 @@ func (rf *Raft) checkTerm(newTerm int) {
 		}
 		rf.state = STATE_FOLLOWER	// convert to follower
 		rf.votedFor = -1			// clear voted candidate
-		rf.mu.Unlock()
+		rf.persist()
 		if isStateChanged {
-			rf.stateChanged <- true
+			rf.stateChanged <- rf.currentTerm
 		}
+		rf.mu.Unlock()
 	}
 }
 
@@ -194,11 +193,12 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 		if LastLogIndex > 0 {
 			LastLogTerm = rf.log[LastLogIndex - 1].Term
 		}
-		// fmt.Printf("%v: Receive vote request from %v [%v, %v]", rf.me, args.CandidateId, args.LastLogIndex, args.LastLogTerm)
-		// fmt.Printf(" self [%v, %v]\n", LastLogIndex, LastLogTerm)
+		// fmt.Printf("%v: Receive vote request from %v(%v) [%v, %v]", rf.me, args.CandidateId, args.Term, args.LastLogIndex, args.LastLogTerm)
+		// fmt.Printf(" self(%v) [%v, %v]\n", rf.currentTerm, LastLogIndex, LastLogTerm)
 		if args.LastLogTerm > LastLogTerm || (args.LastLogTerm == LastLogTerm && args.LastLogIndex >= LastLogIndex) {
 			reply.VoteGranted = true
 			rf.votedFor = args.CandidateId
+			rf.persist()
 			// fmt.Printf("%v: voted for %v\n", rf.me, args.CandidateId)
 		}
 	}
@@ -247,8 +247,8 @@ func (rf *Raft) sendRequestVote(i int, args RequestVoteArgs) {
 				for j := range rf.sendAgain {
 					rf.sendAgain[j] = make(chan bool)
 				}
-				rf.stateChanged <- true
-				fmt.Printf("Raft %v becomes leader, current term: %v\n", rf.me, rf.currentTerm)
+				rf.stateChanged <- rf.currentTerm
+				// fmt.Printf("Raft %v becomes leader, current term: %v\n", rf.me, rf.currentTerm)
 			}
 			rf.mu.Unlock()
 		}
@@ -278,8 +278,9 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		rf.log = append(rf.log, LogEntry{rf.currentTerm, command})
 		index = len(rf.log)
 		rf.matchIndex[rf.me] = index
+		rf.persist()
 		rf.mu.Unlock()
-		fmt.Printf("%v: append [%v, %v]\n", rf.me, index, command)
+		// fmt.Printf("%v: start append [%v, %v]\n", rf.me, index, command)
 		// rf.sendApplyMsg(index, command)
 	}
 
@@ -320,8 +321,8 @@ type AppendEntriesReply struct {
 // AppendEntries RPC Handler
 //
 func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply) {
-	// fmt.Printf("Raft %v received heartbeat from Raft %v.\n", rf.me, args.LeaderId)
 	rf.checkTerm(args.Term)
+	// fmt.Printf("Raft %v(%v) received heartbeat from Raft %v(%v) [%v, %v]...\n", rf.me, rf.currentTerm, args.LeaderId, args.Term, args.PrevLogIndex, args.PrevLogTerm)
 	reply.Term = rf.currentTerm
 	reply.Success = false
 	if rf.state == STATE_FOLLOWER {
@@ -330,8 +331,8 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if rf.state == STATE_CANDIDATE && args.Term == rf.currentTerm {
 		rf.mu.Lock()
 		rf.state = STATE_FOLLOWER	// convert to follower
+		rf.stateChanged <- rf.currentTerm
 		rf.mu.Unlock()
-		rf.stateChanged <- true
 	}
 	if args.Term < rf.currentTerm {
 		return
@@ -348,13 +349,15 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		return
 	}
 	reply.Success = true
+	// fmt.Printf("Raft %v success. Entries length = %v\n", rf.me, len(args.Entries)) 
 	if args.Entries != nil {
 		rf.mu.Lock()
 		rf.log = rf.log[:args.PrevLogIndex]
 		for _, v := range args.Entries {
 			rf.log = append(rf.log, v)
-			fmt.Printf("%v: append [%v, %v]\n", rf.me, len(rf.log), v.Command)
+			// fmt.Printf("%v: append [%v, %v] from %v\n", rf.me, len(rf.log), v.Command, args.LeaderId)
 		}
+		rf.persist()
 		rf.mu.Unlock()
 	}
 	if args.LeaderCommit > rf.commitIndex {
@@ -374,11 +377,15 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 // 
 func (rf *Raft) sendAppendEntries(i int) {
 	numToSend := 0
-	args := AppendEntriesArgs{
-		Term: rf.currentTerm,
-		LeaderId: rf.me,
-		LeaderCommit: rf.commitIndex}
+	args := AppendEntriesArgs{}
 	rf.mu.Lock()
+	if rf.state != STATE_LEADER {
+		rf.mu.Unlock()
+		return
+	}
+	args.Term = rf.currentTerm
+	args.LeaderId = rf.me
+	args.LeaderCommit = rf.commitIndex
 	// fmt.Printf("%v: sendAppendEntries to %v - %v [%v, %v]\n", rf.me, i, rf.currentTerm, rf.nextIndex[i] - 1, len(rf.log))
 	if rf.nextIndex[i] > 1 {
 		args.PrevLogIndex = rf.nextIndex[i] - 1
@@ -442,21 +449,27 @@ func (rf *Raft) run() {
 		switch rf.state {
 		case STATE_FOLLOWER:  // follower
 			timer := time.NewTimer(rf.elecTimeOut)
-			select {
-			case <-rf.heartBeat:
-				// stop the timer
-				if !timer.Stop() {
-					<-timer.C
+			for {
+				select {
+				case <-rf.heartBeat:
+					// stop the timer
+					if !timer.Stop() {
+						<-timer.C
+					}
+				case <-timer.C:
+					// fmt.Printf("Raft %v election time out\n", rf.me)
+					// election time out, convert to candidate
+					rf.mu.Lock()
+					rf.state = STATE_CANDIDATE
+					rf.currentTerm++
+					rf.votedFor = rf.me
+					rf.sumVotes = 1
+					rf.persist()
+					rf.mu.Unlock()
+				case <-rf.stateChanged:
+					continue
 				}
-			case <-timer.C:
-				// fmt.Printf("Raft %v election time out\n", rf.me)
-				// election time out, convert to candidate
-				rf.mu.Lock()
-				rf.state = STATE_CANDIDATE
-				rf.currentTerm++
-				rf.votedFor = rf.me
-				rf.sumVotes = 1
-				rf.mu.Unlock()
+				break
 			}
 		case STATE_CANDIDATE:  // candidate
 			// start election
@@ -479,19 +492,26 @@ func (rf *Raft) run() {
 				go rf.sendRequestVote(i, args)
 			}
 			// wait until state changed or election timeout
-			select {
-			case <-rf.stateChanged:
-				// stop the timer
-				if !timer.Stop() {
-					<-timer.C
+			for {
+				select {
+				case term := <-rf.stateChanged:
+					if term != rf.currentTerm {
+						continue
+					}
+					// stop the timer
+					if !timer.Stop() {
+						<-timer.C
+					}
+				case <-timer.C:
+					// increase term and start a new election
+					rf.mu.Lock()
+					rf.currentTerm++
+					rf.votedFor = rf.me
+					rf.sumVotes = 1
+					rf.persist()
+					rf.mu.Unlock()
 				}
-			case <-timer.C:
-				// increase term and start a new election
-				rf.mu.Lock()
-				rf.currentTerm++
-				rf.votedFor = rf.me
-				rf.sumVotes = 1
-				rf.mu.Unlock()
+				break
 			}
 			// fmt.Printf("Raft %v election ends with %v support\n", rf.me, rf.sumVotes)
 		case STATE_LEADER:  // leader
@@ -562,7 +582,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.lastApplied = 0
 	rf.state = STATE_FOLLOWER
 	rf.heartBeat = make(chan bool)
-	rf.stateChanged = make(chan bool)
+	rf.stateChanged = make(chan int)
 	// randomly generate elecTimeOut between 200ms and 400ms
 	rand.Seed(time.Now().UnixNano())
 	rf.elecTimeOut = time.Duration(200 * (1 + rand.Float64())) * time.Millisecond
