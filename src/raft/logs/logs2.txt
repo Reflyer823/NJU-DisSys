@@ -1,0 +1,135 @@
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+0: start append [19, 1000]
+Raft 3(38) received heartbeat from Raft 0(38).
+3: append [19, 1000] from 0
+Raft 4(38) received heartbeat from Raft 0(38).
+4: append [19, 1000] from 0
+Raft 2(38) received heartbeat from Raft 0(38).
+2: append [19, 1000] from 0
+Raft 1(38) received heartbeat from Raft 0(38).
+0: apply [19, 1000]
+Raft 4(38) received heartbeat from Raft 0(38).
+4: apply [19, 1000]
+Raft 2(38) received heartbeat from Raft 0(38).
+2: apply [19, 1000]
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+3: apply [19, 1000]
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 2(38) received heartbeat from Raft 0(38).
+Raft 3(38) received heartbeat from Raft 0(38).
+Raft 1(38) received heartbeat from Raft 0(38).
+Raft 4(38) received heartbeat from Raft 0(38).
+--- FAIL: TestPersist2 (25.11s)
+    config.go:424: one(1000) failed to reach agreement
+FAIL
+exit status 1
+FAIL    raft    25.113s
+
